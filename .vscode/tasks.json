@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build_silohost",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Kritner.OrleansGettingStarted.SiloHost/Kritner.OrleansGettingStarted.SiloHost.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build_client",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Kritner.OrleansGettingStarted.Client/Kritner.OrleansGettingStarted.Client.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
