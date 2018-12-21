@@ -98,10 +98,20 @@ namespace Kritner.OrleansGettingStarted.Client
 
             // example of calling grains from the initialized client
             var grain = client.GetGrain<IHelloWorld>(Guid.NewGuid());
+            Console.WriteLine("Grain instance should be re-use");
+            Console.ReadKey();
+            Console.WriteLine($"{await grain.SayHello("1")}");
+            Console.WriteLine($"{await grain.SayHello("2")}");
+            Console.WriteLine($"{await grain.SayHello("3")}");
 
-            var response = await grain.SayHello(name);
-
-            Console.WriteLine($"\n\n{response}\n\n");
+            
+            Console.WriteLine("Can create multiple grain instance");
+            var grain1 = client.GetGrain<IHelloWorld>(Guid.NewGuid());
+            var grain2 = client.GetGrain<IHelloWorld>(Guid.NewGuid());
+            var grain3 = client.GetGrain<IHelloWorld>(Guid.NewGuid());
+            Console.WriteLine($"{await grain1.SayHello("instance_1")}");
+            Console.WriteLine($"{await grain2.SayHello("instance_2")}");
+            Console.WriteLine($"{await grain3.SayHello("instance_3")}");
         }
     }
 }

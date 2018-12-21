@@ -9,7 +9,7 @@ namespace Kritner.OrleansGettingStarted.Grains
     {
         public Task<string> SayHello(string name)
         {
-            return Task.FromResult($"Hello World! Orleans is neato torpedo, eh {name}?");
+            return Task.FromResult($"Hello from grain [{this.GetGrainIdentity()}], eh {name}?");
         }
     }
 }
