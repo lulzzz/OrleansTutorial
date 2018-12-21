@@ -25,8 +25,12 @@ namespace Kritner.OrleansGettingStarted.Client
             {
                 using (var client = await StartClientWithRetries())
                 {
-                    await DoClientWork(client);
+                    ///await DoClientWork(client);
+                    await StatefulWorkDemo.DoStatefulWork(client);
+
+                    Console.WriteLine("Press any key to stop Client.");
                     Console.ReadKey();
+                    await client.Close();
                 }
 
                 return 0;
@@ -86,6 +90,7 @@ namespace Kritner.OrleansGettingStarted.Client
             return true;
         }
 
+        /*
         private static async Task DoClientWork(IClusterClient client)
         {
             Console.WriteLine("Hello, what should I call you?");
@@ -113,5 +118,6 @@ namespace Kritner.OrleansGettingStarted.Client
             Console.WriteLine($"{await grain2.SayHello("instance_2")}");
             Console.WriteLine($"{await grain3.SayHello("instance_3")}");
         }
+        */
     }
 }

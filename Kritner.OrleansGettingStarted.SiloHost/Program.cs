@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using Kritner.OrleansGettingStarted.GrainInterfaces;
 using Microsoft.Extensions.Logging;
 using Orleans.Configuration;
 using Orleans.Hosting;
@@ -38,7 +39,13 @@ namespace Kritner.OrleansGettingStarted.SiloHost
                     options.ServiceId = "HelloWorldApp";
                 })
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-                .ConfigureLogging(logging => logging.AddConsole());
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddConsole();
+                    logging.AddDebug();
+                });
+
+            builder.AddMemoryGrainStorage(MyDefineConstants.MemoryProviderName);
 
             var host = builder.Build();
             await host.StartAsync();
