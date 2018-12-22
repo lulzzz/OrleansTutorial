@@ -10,7 +10,7 @@ namespace Kritner.OrleansGettingStarted.Client
 {
     class Program
     {
-        const int initializeAttemptsBeforeFailing = 3;
+        const int initializeAttemptsBeforeFailing = 5;
 
         private static int attempt = 0;
 

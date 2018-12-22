@@ -6,7 +6,6 @@ using Orleans.Providers;
 
 namespace Kritner.OrleansGettingStarted.Grains
 {
-    [StorageProvider(ProviderName = MyDefineConstants.MemoryProviderName)]
     public class VisitTracker : Grain<VisitTrackerState>, IVisitTracker
     {
         public Task<int> GetNumberOfVisits()
