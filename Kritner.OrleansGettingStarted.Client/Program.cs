@@ -55,6 +55,10 @@ namespace Kritner.OrleansGettingStarted.Client
                     options.ClusterId = "dev";
                     options.ServiceId = "HelloWorldApp";
                 })
+                .ConfigureApplicationParts(manager =>
+                {
+                    manager.AddApplicationPart(typeof(IVisitTracker).Assembly).WithReferences();
+                })
                 .ConfigureLogging(logging =>
                 {
                     logging.AddConsole();
