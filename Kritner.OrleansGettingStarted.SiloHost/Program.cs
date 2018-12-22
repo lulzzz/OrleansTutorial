@@ -34,6 +34,7 @@ namespace Kritner.OrleansGettingStarted.SiloHost
         {
             // define the cluster configuration
             var builder = new SiloHostBuilder()
+                .UseDashboard(options => { options.Port = 8099; })
                 .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
@@ -42,13 +43,12 @@ namespace Kritner.OrleansGettingStarted.SiloHost
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(VisitTracker).Assembly).WithReferences())
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-                .ConfigureLogging(logging =>
-                {
-                    logging.AddConsole();
-                    logging.AddDebug();
-                });
-
-            
+                //.ConfigureLogging(logging =>
+                //{
+                //    logging.AddConsole();
+                //    logging.AddDebug();
+                //})
+                ;
 
             //builder.AddMemoryGrainStorage(MyDefineConstants.MemoryProviderName);
             builder.AddCosmosDBGrainStorageAsDefault(options =>
