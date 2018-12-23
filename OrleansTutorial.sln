@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kritner.OrleansGettingStart
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Grain", "Grain", "{CE63C46A-15BB-4839-86EA-1B1C9CB6E76B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreGenericHost", "NetCoreGenericHost\NetCoreGenericHost.csproj", "{69A87182-7851-40F1-A688-91CB3E707625}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,18 @@ Global
 		{6A461CCB-3D83-4945-8E50-4CBE6C971307}.Release|x64.Build.0 = Release|Any CPU
 		{6A461CCB-3D83-4945-8E50-4CBE6C971307}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A461CCB-3D83-4945-8E50-4CBE6C971307}.Release|x86.Build.0 = Release|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Debug|x64.Build.0 = Debug|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Debug|x86.Build.0 = Debug|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Release|x64.ActiveCfg = Release|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Release|x64.Build.0 = Release|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Release|x86.ActiveCfg = Release|Any CPU
+		{69A87182-7851-40F1-A688-91CB3E707625}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
