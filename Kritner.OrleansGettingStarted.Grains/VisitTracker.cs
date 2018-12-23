@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Kritner.OrleansGettingStarted.GrainInterfaces;
+using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Providers;
 
@@ -8,6 +9,13 @@ namespace Kritner.OrleansGettingStarted.Grains
 {
     public class VisitTracker : Grain<VisitTrackerState>, IVisitTracker
     {
+        private readonly ILogger _logger;
+
+        public VisitTracker(ILogger<VisitTracker> logger)
+        {
+            _logger = logger;
+        }
+
         public Task<int> GetNumberOfVisits()
         {
             return Task.FromResult(State.NumberOfVisits);
@@ -25,6 +33,10 @@ namespace Kritner.OrleansGettingStarted.Grains
             State.LastVisit = now;
 
             await WriteStateAsync();
+
+            var helloWorld = GrainFactory.GetGrain<IHelloWorld>(Guid.NewGuid());
+            var text = await helloWorld.SayHello($"{this.GetPrimaryKeyString()}");
+            _logger.LogInformation($"in visiting, has this greeting text={text}");
         }
     }
 

@@ -25,7 +25,7 @@ namespace Kritner.OrleansGettingStarted.Client
             {
                 using (var client = await StartClientWithRetries())
                 {
-                    ///await DoClientWork(client);
+                    //await DoClientWork(client);
                     await StatefulWorkDemo.DoStatefulWork(client);
 
                     Console.WriteLine("Press any key to stop Client.");

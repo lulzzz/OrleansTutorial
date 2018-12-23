@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Kritner.OrleansGettingStarted.Grains;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
@@ -40,6 +41,12 @@ namespace Kritner.OrleansGettingStarted.SiloHost
                 {
                     options.ClusterId = "dev";
                     options.ServiceId = "HelloWorldApp";
+                })
+                .ConfigureServices(services =>
+                {
+                    services
+                        .AddLogging()
+                        .AddTransient<VisitTracker>();
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(VisitTracker).Assembly).WithReferences())
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
