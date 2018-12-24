@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NetCoreGenericHost.Settings;
 using Serilog;
 using Serilog.Events;
 
@@ -60,6 +61,12 @@ namespace NetCoreGenericHost
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
+                    var orleansConf = hostContext.Configuration.GetSection("Orleans");
+
+                    services.AddOptions<SiloConfigSettings>().Bind(orleansConf.GetSection("SiloConfig"));
+                    services.AddOptions<OrleansProviderSettings>().Bind(orleansConf.GetSection("Provider"));
+                    services.AddOptions<OrleansDashboardSettings>().Bind(orleansConf.GetSection("Dashboard"));
+
                     services.Configure<HostOptions>(option =>
                     {
                         option.ShutdownTimeout = System.TimeSpan.FromSeconds(20);

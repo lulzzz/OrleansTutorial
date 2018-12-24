@@ -1,11 +1,13 @@
 ﻿using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Kritner.OrleansGettingStarted.GrainInterfaces;
 using Kritner.OrleansGettingStarted.Grains;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NetCoreGenericHost.Settings;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
@@ -18,10 +20,21 @@ namespace NetCoreGenericHost.HostedServices
         private readonly IApplicationLifetime _applicationLifetime;
         private readonly ILogger<OrleansSiloHostedService> _logger;
         private ISiloHost _siloHost;
+        private IOptions<SiloConfigSettings> _siloOptions;
+        private IOptions<OrleansProviderSettings> _providerOptions;
+        private IOptions<OrleansDashboardSettings> _dashboardOptions;
 
-        public OrleansSiloHostedService(IApplicationLifetime applicationLifetime, ILogger<OrleansSiloHostedService> logger)
+        public OrleansSiloHostedService(IApplicationLifetime applicationLifetime,
+            IOptions<SiloConfigSettings> siloOptions,
+            IOptions<OrleansProviderSettings> providerOptions,
+            IOptions<OrleansDashboardSettings> dashboardOptions,
+            ILogger<OrleansSiloHostedService> logger)
         {
             _applicationLifetime = applicationLifetime;
+            _siloOptions = siloOptions;
+            _providerOptions = providerOptions;
+            _dashboardOptions = dashboardOptions;
+
             _logger = logger;
         }
 
@@ -45,7 +58,7 @@ namespace NetCoreGenericHost.HostedServices
             _logger.LogInformation("initialize Orleans silo host...");
 
             _siloHost = CreateSiloHost();
-           await _siloHost.StartAsync();
+            await _siloHost.StartAsync();
         }
 
         private async void OnApplicationStopping()
@@ -54,50 +67,78 @@ namespace NetCoreGenericHost.HostedServices
             await _siloHost.StopAsync();
         }
 
-        private static ISiloHost CreateSiloHost()
+        private ISiloHost CreateSiloHost()
         {
-            
+            var builder = new SiloHostBuilder();
 
-            // define the cluster configuration
-            var builder = new SiloHostBuilder()
-                .UseDashboard(options => { options.Port = 8099; })
-                //.UseLocalhostClustering()
-                .Configure<ClusterOptions>(options =>
+            if (_dashboardOptions.Value.Enable)
+            {
+                builder.UseDashboard(options =>
                 {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "HelloWorldApp";
-                })
-                .ConfigureEndpoints(advertisedIP:IPAddress.Any, siloPort: 10000,30000,true)
-                .UseMongoDBClustering(options =>
+                    options.Port = _dashboardOptions.Value.Port;
+                });
+            }
+
+            builder.Configure<ClusterOptions>(options =>
+            {
+                options.ClusterId = _siloOptions.Value.ClusterId;
+                options.ServiceId = _siloOptions.Value.ServiceId;
+            })
+            .ConfigureEndpoints(IPAddress.Loopback, _siloOptions.Value.SiloPort, _siloOptions.Value.GatewayPort, true);
+
+            if (_providerOptions.Value.DefaultProvider == "MongoDB")
+            {
+                var mongoDbOption = _providerOptions.Value.MongoDB;
+                builder.UseMongoDBClustering(options =>
                 {
-                    options.ConnectionString = @"mongodb://localhost:27017";
-                    options.DatabaseName = @"orleans_conf-Clustering";
+                    var clusterOption = mongoDbOption.Cluster;
+
+                    options.ConnectionString = clusterOption.DbConn;
+                    options.DatabaseName = clusterOption.DbName;
+
                     // see:https://github.com/OrleansContrib/Orleans.Providers.MongoDB/issues/54
-                    options.CollectionPrefix = "demo";
+                    options.CollectionPrefix = clusterOption.CollectionPrefix;
                 })
                 .UseMongoDBReminders(options =>
                 {
-                    options.ConnectionString = @"mongodb://localhost:27017";
-                    options.DatabaseName = @"orleans_conf-Reminders";
+                    var reminderOption = mongoDbOption.Reminder;
+
+                    options.ConnectionString = reminderOption.DbConn;
+                    options.DatabaseName = reminderOption.DbName;
+
+                    if (!string.IsNullOrEmpty(reminderOption.CollectionPrefix))
+                    {
+                        options.CollectionPrefix = reminderOption.CollectionPrefix;
+                    }
+
                 })
                 .AddMongoDBGrainStorageAsDefault(options =>
                 {
-                    options.ConnectionString = @"mongodb://localhost:27017";
-                    options.DatabaseName = @"orleans_conf-Storage";
-                })
-                .ConfigureServices(services =>
-                {
-                    services
-                        .AddLogging(loggingBuilder => loggingBuilder.AddSerilog())
-                        .AddTransient<VisitTracker>();
-                })
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(VisitTracker).Assembly).WithReferences())
-                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-                .ConfigureLogging(logging =>
-                {
-                    logging.AddSerilog(dispose: true);
-                })
-                ;
+                    var storageOption = mongoDbOption.Storage;
+
+                    options.ConnectionString = storageOption.DbConn;
+                    options.DatabaseName = storageOption.DbName;
+
+                    if (!string.IsNullOrEmpty(storageOption.CollectionPrefix))
+                    {
+                        options.CollectionPrefix = storageOption.CollectionPrefix;
+                    }
+                });
+            }
+
+            builder.ConfigureServices(services =>
+            {
+                services
+                    .AddLogging(loggingBuilder => loggingBuilder.AddSerilog())
+                    .AddTransient<VisitTracker>();
+            })
+            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(VisitTracker).Assembly).WithReferences())
+            .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+            .ConfigureLogging(logging =>
+            {
+                logging.AddSerilog(dispose: true);
+            })
+            ;
 
             var host = builder.Build();
             return host;
