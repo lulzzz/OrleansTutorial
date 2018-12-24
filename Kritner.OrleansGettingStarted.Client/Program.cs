@@ -48,6 +48,8 @@ namespace Kritner.OrleansGettingStarted.Client
         {
             attempt = 0;
 
+            
+
             var client = new ClientBuilder()
                 .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>

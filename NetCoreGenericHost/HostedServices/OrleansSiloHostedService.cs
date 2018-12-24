@@ -56,14 +56,34 @@ namespace NetCoreGenericHost.HostedServices
 
         private static ISiloHost CreateSiloHost()
         {
+            
+
             // define the cluster configuration
             var builder = new SiloHostBuilder()
                 .UseDashboard(options => { options.Port = 8099; })
-                .UseLocalhostClustering()
+                //.UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "dev";
                     options.ServiceId = "HelloWorldApp";
+                })
+                .ConfigureEndpoints(advertisedIP:IPAddress.Any, siloPort: 10000,30000,true)
+                .UseMongoDBClustering(options =>
+                {
+                    options.ConnectionString = @"mongodb://localhost:27017";
+                    options.DatabaseName = @"orleans_conf-Clustering";
+                    // see:https://github.com/OrleansContrib/Orleans.Providers.MongoDB/issues/54
+                    options.CollectionPrefix = "demo";
+                })
+                .UseMongoDBReminders(options =>
+                {
+                    options.ConnectionString = @"mongodb://localhost:27017";
+                    options.DatabaseName = @"orleans_conf-Reminders";
+                })
+                .AddMongoDBGrainStorageAsDefault(options =>
+                {
+                    options.ConnectionString = @"mongodb://localhost:27017";
+                    options.DatabaseName = @"orleans_conf-Storage";
                 })
                 .ConfigureServices(services =>
                 {
@@ -73,14 +93,11 @@ namespace NetCoreGenericHost.HostedServices
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(VisitTracker).Assembly).WithReferences())
                 .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-                //.ConfigureLogging(logging =>
-                //{
-                //    logging.AddConsole();
-                //    logging.AddDebug();
-                //})
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddSerilog(dispose: true);
+                })
                 ;
-
-            builder.AddMemoryGrainStorageAsDefault();
 
             var host = builder.Build();
             return host;
