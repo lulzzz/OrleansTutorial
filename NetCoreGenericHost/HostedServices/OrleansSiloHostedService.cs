@@ -1,8 +1,6 @@
-﻿using System.Net;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Kritner.OrleansGettingStarted.Grains;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -84,7 +82,7 @@ namespace NetCoreGenericHost.HostedServices
                 options.ClusterId = _siloOptions.Value.ClusterId;
                 options.ServiceId = _siloOptions.Value.ServiceId;
             })
-            .ConfigureEndpoints(IPAddress.Loopback, _siloOptions.Value.SiloPort, _siloOptions.Value.GatewayPort, true);
+            .ConfigureEndpoints( _siloOptions.Value.SiloPort, _siloOptions.Value.GatewayPort);
 
             if (_providerOptions.Value.DefaultProvider == "MongoDB")
             {
@@ -132,8 +130,10 @@ namespace NetCoreGenericHost.HostedServices
                     .AddLogging(loggingBuilder => loggingBuilder.AddSerilog())
                     .AddTransient<VisitTracker>();
             })
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(VisitTracker).Assembly).WithReferences())
-            .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+            .ConfigureApplicationParts(parts =>
+            {
+                parts.AddFromApplicationBaseDirectory().WithReferences();
+            })
             .ConfigureLogging(logging =>
             {
                 logging.AddSerilog(dispose: true);
