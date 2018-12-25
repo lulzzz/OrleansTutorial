@@ -1,6 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Kritner.OrleansGettingStarted.Grains;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -56,13 +59,29 @@ namespace NetCoreGenericHost.HostedServices
             _logger.LogInformation("initialize Orleans silo host...");
 
             _siloHost = CreateSiloHost();
-            await _siloHost.StartAsync();
+            try
+            {
+                await _siloHost.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,"Start up Silo Host failed");
+                throw;
+            }
         }
 
         private async void OnApplicationStopping()
         {
             _logger.LogInformation("stopping Orleans silo host...");
-            await _siloHost.StopAsync();
+
+            try
+            {
+                await _siloHost.StopAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when shutdown Silo Host");
+            }
         }
 
         private ISiloHost CreateSiloHost()
@@ -81,8 +100,20 @@ namespace NetCoreGenericHost.HostedServices
             {
                 options.ClusterId = _siloOptions.Value.ClusterId;
                 options.ServiceId = _siloOptions.Value.ServiceId;
-            })
-            .ConfigureEndpoints( _siloOptions.Value.SiloPort, _siloOptions.Value.GatewayPort);
+            });
+
+            if (string.IsNullOrEmpty(_siloOptions.Value.AdvertisedIp) || "*".Equals(_siloOptions.Value.AdvertisedIp))
+            {
+                builder.ConfigureEndpoints(_siloOptions.Value.SiloPort, _siloOptions.Value.GatewayPort,
+                    listenOnAnyHostAddress: _siloOptions.Value.ListenOnAnyHostAddress);
+            }
+            else
+            {
+                var ip = IPAddress.Parse(_siloOptions.Value.AdvertisedIp);
+
+                builder.ConfigureEndpoints(ip, _siloOptions.Value.SiloPort, _siloOptions.Value.GatewayPort,
+                    listenOnAnyHostAddress: _siloOptions.Value.ListenOnAnyHostAddress);
+            }
 
             if (_providerOptions.Value.DefaultProvider == "MongoDB")
             {
@@ -141,6 +172,7 @@ namespace NetCoreGenericHost.HostedServices
             ;
 
             var host = builder.Build();
+            
             return host;
         }
     }
