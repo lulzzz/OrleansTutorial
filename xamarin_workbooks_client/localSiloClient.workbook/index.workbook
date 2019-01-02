@@ -1,0 +1,57 @@
+---
+uti: com.xamarin.workbook
+id: d823ff7a-8087-4dca-a358-9d298468da3d
+title: localSiloClient
+platforms:
+- DotNetCore
+packages:
+- id: Microsoft.Orleans.Client
+  version: 2.2.0
+- id: Microsoft.Orleans.OrleansRuntime
+  version: 2.2.0
+---
+
+```csharp
+#r "Orleans.Runtime"
+#r "..\Kritner.OrleansGettingStarted.GrainInterfaces\bin\Debug\netstandard2.0\Kritner.OrleansGettingStarted.GrainInterfaces.dll"
+using Orleans;
+using Orleans.Configuration;
+```
+
+```csharp
+var builder = new ClientBuilder().UseLocalhostClustering().Configure<ClusterOptions>(options=>{options.ClusterId = "dev"; options.ServiceId = "HelloWorldApp";}).ConfigureApplicationParts(manager =>{
+    manager.AddApplicationPart(typeof(Kritner.OrleansGettingStarted.GrainInterfaces.IVisitTracker).Assembly).WithReferences();
+});
+```
+
+```csharp
+var client = builder.Build();
+```
+
+```csharp
+await client.Connect();
+```
+
+```csharp
+var grain = client.GetGrain<Kritner.OrleansGettingStarted.GrainInterfaces.IHelloWorld>(Guid.NewGuid());
+```
+
+```csharp
+await grain.SayHello("Xamarin Workbook client");
+```
+
+```csharp
+var kritnerGrain = client.GetGrain<Kritner.OrleansGettingStarted.GrainInterfaces.IVisitTracker>("kritner@gmail.com");
+```
+
+```csharp
+await kritnerGrain.VisitAsync();
+```
+
+```csharp
+await kritnerGrain.GetNumberOfVisits();
+```
+
+```csharp
+await client.Close();
+```
