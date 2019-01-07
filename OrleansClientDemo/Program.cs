@@ -101,6 +101,10 @@ namespace OrleansClientDemo
                     // see:https://github.com/OrleansContrib/Orleans.Providers.MongoDB/issues/54
                     options.CollectionPrefix = mongoSetting.CollectionPrefix;
                 })
+                .Configure<ClientMessagingOptions>(options =>{
+                    options.ResponseTimeout = TimeSpan.FromSeconds(20);
+                    options.ResponseTimeoutWithDebugger = TimeSpan.FromMinutes(60);
+                })
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "dev";
